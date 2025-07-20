@@ -1,0 +1,66 @@
+= FX Rate Service Backend
+
+== Overview
+
+This project implements a Spring Boot REST backend service for FX rates. It provides endpoints to submit, retrieve, and manage FX rates for currency pairs, with the following features:
+
+- Store the last ten FX rates per currency pair.
+- Generate random rates for EURUSD and GBPUSD.
+- Provide endpoints to get, add, delete, and list rates and pairs.
+- CORS policy enabled for all origins.
+- The `/api/fxrate/latest` endpoint generates and returns a random rate for the requested pair, but every 5th call returns a random EURUSD rate.
+
+== Key Changes
+
+=== pom.xml
+
+- Added Spring Boot dependencies and build plugin for Maven.
+
+=== Model
+
+- `FxRate.java`: Represents an FX rate with base/quote currency, rate, and event time.
+
+=== Service
+
+- `FxRateService.java`:
+  - Stores last ten rates per currency pair.
+  - Generates random rates for requested pairs.
+  - Every 5th call to `getLatestRate` returns a random EURUSD rate.
+  - Methods to add, retrieve, delete, and list rates and pairs.
+
+=== Controller
+
+- `FxRateController.java`:
+  - Endpoints to add, get, and delete rates.
+  - Endpoint to list all pairs.
+  - Endpoint to generate random rates for EURUSD and GBPUSD.
+  - Endpoint to get the latest rate (with random generation logic).
+
+=== CORS
+
+- `WebConfig.java`: Configures CORS to allow all origins, methods, and headers.
+
+=== Application Entry
+
+- `FxRateApplication.java`: Standard Spring Boot application entry point.
+
+== API Endpoints
+
+- `POST /api/fxrate` — Add a new FX rate.
+- `GET /api/fxrate` — Get last ten rates for a currency pair.
+- `GET /api/fxrate/pairs` — List all currency pairs with stored rates.
+- `DELETE /api/fxrate` — Delete all rates for a currency pair.
+- `DELETE /api/fxrate/all` — Delete all rates.
+- `GET /api/fxrate/latest` — Get the latest (random) FX rate for a pair; every 5th call returns EURUSD.
+- `POST /api/fxrate/generate-random` — Generate and store random rates for EURUSD and GBPUSD.
+
+== Special Logic
+
+- The service always stores only the last ten rates per pair.
+- The `/api/fxrate/latest` endpoint generates a new random rate for the requested pair and stores it. Every 5th call (across all pairs) returns a new EURUSD rate instead.
+
+== CORS
+
+- All endpoints are accessible from any origin due to the global CORS configuration.
+
+
