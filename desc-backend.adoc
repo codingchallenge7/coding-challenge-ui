@@ -8,7 +8,9 @@ This project implements a Spring Boot REST backend service for FX rates. It prov
 - Generate random rates for EURUSD and GBPUSD.
 - Provide endpoints to get, add, delete, and list rates and pairs.
 - CORS policy enabled for all origins.
-- The `/api/fxrate/latest` endpoint generates and returns a random rate for the requested pair, but every 5th call returns a random EURUSD rate.
+- The `/api/fxrate/latest` endpoint generates and returns a random rate for the requested pair, but every 5th call returns a random GBPUSD rate (the returned object uses the requested ccyPair, but the rate is from GBPUSD).
+- Artificial delay of up to 7 seconds is introduced in `/api/fxrate/latest` to simulate real-world latency.
+- The backend supports an "exchange running" status, which can be queried via `/api/fxrate/exchange/status`.
 
 == Key Changes
 
@@ -18,15 +20,17 @@ This project implements a Spring Boot REST backend service for FX rates. It prov
 
 === Model
 
-- `FxRate.java`: Represents an FX rate with base/quote currency, rate, and event time.
+- `FxRate.java`: Represents an FX rate with `ccyPair`, `rate`, and `eventTime`.
 
 === Service
 
 - `FxRateService.java`:
   - Stores last ten rates per currency pair.
   - Generates random rates for requested pairs.
-  - Every 5th call to `getLatestRate` returns a random EURUSD rate.
+  - Every 5th call to `getLatestRate` returns a random GBPUSD rate (with the requested ccyPair).
+  - Artificial delay (up to 7 seconds) in `getLatestRate`.
   - Methods to add, retrieve, delete, and list rates and pairs.
+  - Maintains and exposes an "exchange running" status.
 
 === Controller
 
@@ -34,7 +38,8 @@ This project implements a Spring Boot REST backend service for FX rates. It prov
   - Endpoints to add, get, and delete rates.
   - Endpoint to list all pairs.
   - Endpoint to generate random rates for EURUSD and GBPUSD.
-  - Endpoint to get the latest rate (with random generation logic).
+  - Endpoint to get the latest rate (with random generation logic and artificial delay).
+  - Endpoint to query exchange running status.
 
 === CORS
 
@@ -47,20 +52,22 @@ This project implements a Spring Boot REST backend service for FX rates. It prov
 == API Endpoints
 
 - `POST /api/fxrate` — Add a new FX rate.
-- `GET /api/fxrate` — Get last ten rates for a currency pair.
+- `GET /api/fxrate?ccyPair=EURUSD` — Get last ten rates for a currency pair.
+- `GET /api/fxrate` — Get the latest ten rates across all pairs (if `ccyPair` is not provided).
 - `GET /api/fxrate/pairs` — List all currency pairs with stored rates.
-- `DELETE /api/fxrate` — Delete all rates for a currency pair.
+- `DELETE /api/fxrate?ccyPair=EURUSD` — Delete all rates for a currency pair.
 - `DELETE /api/fxrate/all` — Delete all rates.
-- `GET /api/fxrate/latest` — Get the latest (random) FX rate for a pair; every 5th call returns EURUSD.
+- `GET /api/fxrate/latest?ccyPair=EURUSD` — Get the latest (random) FX rate for a pair; every 5th call returns a GBPUSD rate (with the requested ccyPair).
 - `POST /api/fxrate/generate-random` — Generate and store random rates for EURUSD and GBPUSD.
+- `GET /api/fxrate/exchange/status` — Get the FX exchange running status (boolean).
 
 == Special Logic
 
 - The service always stores only the last ten rates per pair.
-- The `/api/fxrate/latest` endpoint generates a new random rate for the requested pair and stores it. Every 5th call (across all pairs) returns a new EURUSD rate instead.
+- The `/api/fxrate/latest` endpoint generates a new random rate for the requested pair and stores it. Every 5th call (across all pairs) returns a new GBPUSD rate (with the requested ccyPair).
+- Artificial delay of up to 7 seconds is introduced in `/api/fxrate/latest` to simulate real-world latency.
+- The backend maintains an "exchange running" status, which can be queried by the UI.
 
 == CORS
 
 - All endpoints are accessible from any origin due to the global CORS configuration.
-
-

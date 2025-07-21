@@ -1,0 +1,239 @@
+= FX Rate Service
+
+A Spring Boot REST backend service for managing and simulating FX rates for currency pairs.
+
+== Build and Run Instructions
+
+The project includes a helper script `build-and-run.sh` that automates the build and run process for both the backend (Spring Boot) and frontend (React).
+
+=== How the Script Works
+
+1. **Checks for Java, Maven, Node.js, and npm:**
+   The script verifies if these tools are available in your system's PATH.
+   If not found, it attempts to set their locations to the following defaults:
+   - `JAVA_HOME` to `/Volumes/backup/codebase/java`
+   - `MAVEN_HOME` to `/Volumes/backup/codebase/apache-maven-3.9.9`
+   - `NODE_HOME` to `/Volumes/backup/codebase/node`
+   and updates the PATH accordingly.
+
+2. **Displays Versions:**
+   Prints the version of Java, Maven, Node.js, and npm for confirmation.
+
+3. **Builds the Backend:**
+   Runs `mvn clean package -DskipTests` to build the Spring Boot backend.
+
+4. **Starts the Backend:**
+   Launches the backend JAR in the background.
+
+5. **Waits for Backend Startup:**
+   Waits 10 seconds to allow the backend to initialize.
+
+6. **Installs Frontend Dependencies:**
+   Runs `npm install` to install React and related dependencies.
+
+7. **Starts the Frontend:**
+   Runs `npm start` to launch the React UI on [http://localhost:3000](http://localhost:3000).
+
+8. **Shuts Down the Backend:**
+   When the frontend process exits, the backend process is also terminated.
+
+=== To Use
+
+[source,shell]
+----
+chmod +x build-and-run.sh
+./build-and-run.sh
+----
+
+This will build and run both backend and frontend, handling environment setup for you.
+
+== Features
+
+- Store the last ten FX rates per currency pair.
+- Generate and retrieve random FX rates for EURUSD and GBPUSD.
+- Retrieve, add, delete, and list FX rates and currency pairs.
+- CORS enabled for all origins.
+- `/api/fxrate/latest` generates and returns a random rate for the requested pair, but every 5th call returns a random GBPUSD rate (the returned object uses the requested ccyPair, but the rate is from GBPUSD).
+- Artificial delay of up to 7 seconds is introduced in `/api/fxrate/latest` to simulate real-world latency.
+- The backend supports an "exchange running" status, which can be queried via `/api/fxrate/exchange/status`.
+- If no `ccyPair` is provided to `/api/fxrate`, the latest 10 rates across all pairs are returned.
+
+== API Endpoints
+
+=== Add a New FX Rate
+
+[source,http]
+----
+POST /api/fxrate
+Content-Type: application/json
+
+{
+  "ccyPair": "EURUSD",
+  "rate": 1.1234,
+  "eventTime": "2024-06-01T12:00:00Z"
+}
+----
+
+=== Get Last Ten Rates for a Currency Pair
+
+[source,http]
+----
+GET /api/fxrate?ccyPair=EURUSD
+----
+
+.Response Example
+[source,json]
+----
+[
+  {
+    "ccyPair": "EURUSD",
+    "rate": 1.1234,
+    "eventTime": "2024-06-01T12:00:00Z"
+  },
+  ...
+]
+----
+
+=== Get Latest Ten Rates Across All Pairs
+
+[source,http]
+----
+GET /api/fxrate
+----
+
+.Response Example
+[source,json]
+----
+[
+  {
+    "ccyPair": "GBPUSD",
+    "rate": 1.2512,
+    "eventTime": "2024-06-01T12:05:00Z"
+  },
+  ...
+]
+----
+
+=== Get All Currency Pairs
+
+[source,http]
+----
+GET /api/fxrate/pairs
+----
+
+.Response Example
+[source,json]
+----
+["EURUSD", "GBPUSD"]
+----
+
+=== Delete All Rates for a Currency Pair
+
+[source,http]
+----
+DELETE /api/fxrate?ccyPair=EURUSD
+----
+
+=== Delete All Rates
+
+[source,http]
+----
+DELETE /api/fxrate/all
+----
+
+=== Get the Latest FX Rate for a Currency Pair
+
+Generates and stores a new random rate for the requested pair. Every 5th call (across all pairs) returns a new GBPUSD rate (with the requested ccyPair).
+
+[source,http]
+----
+GET /api/fxrate/latest?ccyPair=GBPUSD
+----
+
+.Response Example
+[source,json]
+----
+{
+  "ccyPair": "GBPUSD",
+  "rate": 1.2512,
+  "eventTime": "2024-06-01T12:05:00Z"
+}
+----
+
+=== Generate Random Rates for EURUSD and GBPUSD
+
+[source,http]
+----
+POST /api/fxrate/generate-random
+----
+
+=== Get FX Exchange Status
+
+[source,http]
+----
+GET /api/fxrate/exchange/status
+----
+
+.Response Example
+[source,json]
+----
+true
+----
+
+== Special Logic
+
+- Only the last ten rates per pair are stored.
+- `/api/fxrate/latest` always generates and stores a new random rate for the requested pair, except every 5th call, which returns a new GBPUSD rate (with the requested ccyPair).
+- Artificial delay of up to 7 seconds is introduced in `/api/fxrate/latest` to simulate real-world latency.
+- The backend maintains an "exchange running" status, which can be queried by the UI.
+- If no `ccyPair` is provided to `/api/fxrate`, the latest 10 rates across all pairs are returned.
+
+== CORS
+
+All endpoints are accessible from any origin.
+
+== Example Usage
+
+Add a rate:
+[source,shell]
+----
+curl -X POST http://localhost:8080/api/fxrate \
+  -H "Content-Type: application/json" \
+  -d '{"ccyPair":"EURUSD","rate":1.12,"eventTime":"2024-06-01T12:00:00Z"}'
+----
+
+Get latest rate:
+[source,shell]
+----
+curl "http://localhost:8080/api/fxrate/latest?ccyPair=GBPUSD"
+----
+
+List all pairs:
+[source,shell]
+----
+curl "http://localhost:8080/api/fxrate/pairs"
+----
+
+Generate random rates:
+[source,shell]
+----
+curl -X POST http://localhost:8080/api/fxrate/generate-random
+----
+
+Delete all rates for a pair:
+[source,shell]
+----
+curl -X DELETE "http://localhost:8080/api/fxrate?ccyPair=EURUSD"
+----
+
+Delete all rates:
+[source,shell]
+----
+curl -X DELETE http://localhost:8080/api/fxrate/all
+----
+
+Get FX exchange status:
+[source,shell]
+----
+curl "http://localhost:8080/api/fxrate/exchange/status"
+----

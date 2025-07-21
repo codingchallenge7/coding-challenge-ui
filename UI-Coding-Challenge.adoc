@@ -1,0 +1,69 @@
+= FX Rate UI Coding Challenge
+
+Welcome to the FX Rate UI coding challenge!
+
+This project is designed to assess your React, JavaScript, and CSS skills.
+**You do NOT need to make any changes to the backend Java code.**
+Your focus should be on the React UI and CSS only.
+
+== Challenge Overview
+
+You are provided with a working React application that interacts with a backend FX Rate REST API.
+Your task is to complete the UI by addressing the `TODO` comments in the React (`App.js`) and CSS (`App.css`) files.
+
+NOTE: The backend is already implemented and running. You do not need to change or review any Java code.
+
+== What You Need To Do
+
+- Open `/src/App.js` and `/src/App.css`.
+- Complete all `TODO` tasks in these files.
+- You may refactor, improve, or restyle the UI as you see fit, but **do not** change backend endpoints or logic.
+- You are encouraged to demonstrate best practices in React, JavaScript, and CSS.
+
+== Example TODOs (You will see these in the code)
+
+- Show a loading spinner or message when data is loading.
+- Display the latest FX rate in a more readable format (e.g., with 4 decimal places).
+- Create a table or list to display the last ten historic rates (see the "Get Historic rates" button and section).
+- Improve the overall look and feel of the UI.
+- Display the FX exchange status somewhere on the page.
+
+== Evaluation Criteria
+
+- Code readability and maintainability.
+- Use of idiomatic React and JavaScript.
+- CSS clarity, structure, and responsiveness.
+- User experience and UI polish.
+- Correctness and completeness of all TODOs.
+
+== How To Run
+
+1. Ensure you have Node.js and npm installed.
+2. Run `npm install` in the project root.
+3. Start the backend Spring Boot server (already implemented for you, or use the provided `build-and-run.sh` script).
+4. Run `npm start` to launch the React UI.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+[NOTE]
+====
+You can use the provided `build-and-run.sh` script to build and run both the backend and frontend automatically.
+This script is fully runnable by itself: simply execute
+
+ chmod +x build-and-run.sh
+ ./build-and-run.sh
+
+It will check for required tools, build and start the backend, install frontend dependencies, and start the React UI.
+No manual steps are needed beyond running this script.
+====
+
+== Submission Guidelines
+- This coding challenge will be discussed in the next interview round where you will be asked to explain your code and design choices.
+- Ensure you visualize future improvements or features you would add.
+
+== Notes
+
+- The backend provides endpoints for latest rates, historic rates, and FX exchange status.
+- The "Get Historic rates" button fetches the latest 10 rates across all pairs and should display them in a user-friendly way.
+- All backend endpoints are already implemented and available.
+
+== Good luck!
